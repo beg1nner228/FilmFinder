@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MovieFinder — UI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        body { background: #f4f4f4; font-family: system-ui, sans-serif; }
+
+        /* Карточки фильмов */
+        .card { 
+            transition: 0.25s; 
+            border: none; 
+            border-radius: 18px; 
+            background: #fff;
+        }
+        .card:hover { 
+            transform: translateY(-6px); 
+            box-shadow: 0 10px 28px rgba(0,0,0,0.12); 
+        }
+        .movie-poster { 
+            border-radius: 18px 18px 0 0;
+            object-fit: cover;
+            height: 240px;
+        }
+
+        /* Текст */
+        h3, h4, h5 { letter-spacing: -0.3px; }
+        .text-secondary { color: #6d6d6d !important; }
+
+        /* Рейтинг */
+        .star { color: #ffb400; font-size: 18px; }
+
+        /* Skeleton loader */
+        .skeleton { 
+            background: linear-gradient(90deg, #e3e3e3 25%, #f0f0f0 50%, #e3e3e3 75%);
+            background-size: 400% 100%;
+            animation: shine 1.3s infinite;
+        }
+        @keyframes shine { 
+            0% { background-position: 200% 0; } 
+            100% { background-position: -200% 0; } 
+        }
+        .skeleton-box { border-radius: 14px; height: 260px; }
+        .skeleton-text { height: 18px; border-radius: 6px; margin-top: 12px; }
+
+        /* Navbar */
+        .navbar { border-bottom: 1px solid #202020; }
+        .navbar-brand { font-size: 22px; }
+
+        /* Модалка */
+        .modal-content { 
+            border-radius: 20px !important;
+            padding: 4px;
+            background: #ffffff;
+        }
+        .modal-header, .modal-footer { border: none; }
+        .modal-body img { border-radius: 14px; }
+
+        /* Карусель */
+        .carousel-inner img {
+            border-radius: 16px;
+            height: 300px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+<!-- НАВБАР -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark p-2">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">🎬 MovieFinder</a>
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#menu"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Жанры</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Боевик</a></li>
+                        <li><a class="dropdown-item" href="#">Комедия</a></li>
+                        <li><a class="dropdown-item" href="#">Ужасы</a></li>
+                        <li><a class="dropdown-item" href="#">Фантастика</a></li>
+                        <li><a class="dropdown-item" href="#">Драма</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="#">🔥 Топ фильмов</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ПОИСК -->
+<div class="container mt-4">
+    <div class="card shadow-sm p-3 border-0">
+        <form>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" placeholder="Введите название фильма..." />
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option>По названию</option>
+                        <option>По жанру</option>
+                        <option>По описанию</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary">Искать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- SKELETON LOADER (показывается во время загрузки) -->
+<div class="container mt-4" id="skeleton" style="display:none;">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="skeleton skeleton-box w-100"></div>
+            <div class="skeleton skeleton-text w-75"></div>
+            <div class="skeleton skeleton-text w-50"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="skeleton skeleton-box w-100"></div>
+            <div class="skeleton skeleton-text w-75"></div>
+            <div class="skeleton skeleton-text w-50"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="skeleton skeleton-box w-100"></div>
+            <div class="skeleton skeleton-text w-75"></div>
+            <div class="skeleton skeleton-text w-50"></div>
+        </div>
+    </div>
+</div>
+
+<!-- СПИСОК ФИЛЬМОВ -->
+<div class="container mt-4" id="moviesList">
+    <h3 class="fw-bold mb-3">Результаты поиска</h3>
+
+    <div class="row g-4">
+        <!-- Пример карточки -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <img src="https://via.placeholder.com/400x250" class="movie-poster" />
+                <div class="card-body d-flex flex-column">
+                    <h5 class="fw-bold">Название фильма</h5>
+                    <div class="mb-2">
+                        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star text-muted">★</span>
+                    </div>
+                    <p class="text-secondary flex-grow-1">Краткое описание фильма...</p>
+                    <button class="btn btn-outline-primary mt-auto" data-bs-toggle="modal" data-bs-target="#detailsModal">Подробнее</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПОДРОБНОСТЕЙ -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content p-2" style="border-radius:16px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Подробная информация</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <img src="https://via.placeholder.com/400x500" class="img-fluid rounded" />
+                    </div>
+                    <div class="col-md-7">
+                        <h4 class="fw-bold">Название фильма</h4>
+                        <p class="text-secondary">Полное описание фильма появляется здесь, если найдено более одного результата.</p>
+
+                        <!-- Карусель изображений/кадров -->
+                        <div id="carouselShots" class="carousel slide mt-3">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="https://via.placeholder.com/600x300" class="d-block w-100 rounded">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="https://via.placeholder.com/600x300/999" class="d-block w-100 rounded">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselShots" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselShots" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
